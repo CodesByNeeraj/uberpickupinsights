@@ -1,40 +1,125 @@
 import { useState } from 'react';
+import {
+  Navigation,
+  Users,
+  Clock,
+  ShieldAlert,
+  AlertTriangle,
+  Lock,
+  Plane,
+} from 'lucide-react';
 import UberOfferCard from './UberOfferCard';
 
-const DEMO_STATES = [
+// ─── Insight data ─────────────────────────────────────────────────────────────
+// treatment A: frequency scale  |  treatment B: flat pop-out
+
+const INSIGHTS = {
+  entrance_medium: {
+    label: 'Entrance hard to find',
+    treatment: 'A',
+    severity: 'amber',
+    icon: Navigation,
+    frequency: 'medium',
+  },
+  crowded_high: {
+    label: 'Pickup spot usually crowded',
+    treatment: 'A',
+    severity: 'amber',
+    icon: Users,
+    frequency: 'high',
+  },
+  rider_low: {
+    label: 'Rider often not ready',
+    treatment: 'A',
+    severity: 'amber',
+    icon: Clock,
+    frequency: 'low',
+  },
+  no_stop: {
+    label: 'No stopping zone',
+    treatment: 'B',
+    severity: 'red',
+    icon: ShieldAlert,
+    description: 'Risk of ticket — consider double-parking briefly',
+  },
+  road_closed: {
+    label: 'Road closed',
+    treatment: 'B',
+    severity: 'red',
+    icon: AlertTriangle,
+    description: 'Detour in effect, add 2–3 min',
+  },
+  gated: {
+    label: 'Gated community',
+    treatment: 'B',
+    severity: 'amber',
+    icon: Lock,
+    description: 'Call rider for gate code on arrival',
+  },
+  airport: {
+    label: 'Airport terminal',
+    treatment: 'B',
+    severity: 'neutral',
+    icon: Plane,
+    description: 'Check app for exact terminal before pulling up',
+  },
+};
+
+// ─── Scenarios ────────────────────────────────────────────────────────────────
+
+const SCENARIOS = [
   {
-    label: 'No insight',
-    description: 'Card identical to original',
+    label: 'None (no insight)',
     insights: [],
   },
   {
-    label: 'Amber — single',
-    description: 'One friction issue',
-    insights: [
-      { label: 'Entrance hard to find', severity: 'amber', count: 8 },
-    ],
+    label: 'Entrance hard to find — A, amber, medium',
+    insights: [INSIGHTS.entrance_medium],
   },
   {
-    label: 'Red — single',
-    description: 'One legal/safety issue',
-    insights: [
-      { label: 'No stopping zone', severity: 'red', count: 11 },
-    ],
+    label: 'Pickup spot usually crowded — A, amber, high',
+    insights: [INSIGHTS.crowded_high],
   },
   {
-    label: 'Multiple (+2)',
-    description: 'Top issue shown, +2 suffix, expandable',
-    insights: [
-      { label: 'Entrance hard to find', severity: 'amber', count: 8 },
-      { label: 'No stopping zone', severity: 'red', count: 4 },
-      { label: 'Pickup spot usually crowded', severity: 'amber', count: 3 },
-    ],
+    label: 'Rider often not ready — A, amber, low',
+    insights: [INSIGHTS.rider_low],
+  },
+  {
+    label: 'No stopping zone — B, red',
+    insights: [INSIGHTS.no_stop],
+  },
+  {
+    label: 'Road closed — B, red',
+    insights: [INSIGHTS.road_closed],
+  },
+  {
+    label: 'Gated community — B, amber',
+    insights: [INSIGHTS.gated],
+  },
+  {
+    label: 'Airport terminal — B, neutral',
+    insights: [INSIGHTS.airport],
+  },
+  {
+    label: 'Multiple issues stacked (+2)',
+    insights: [INSIGHTS.no_stop, INSIGHTS.entrance_medium, INSIGHTS.crowded_high],
   },
 ];
 
+const TIERS = [
+  { value: 0, label: 'None' },
+  { value: 2, label: 'Tier 2  +$2' },
+  { value: 3, label: 'Tier 3  +$4' },
+  { value: 4, label: 'Tier 4  Surge' },
+];
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+
 export default function App() {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const active = DEMO_STATES[activeIdx];
+  const [scenarioIdx, setScenarioIdx]   = useState(0);
+  const [incentiveTier, setIncentiveTier] = useState(0);
+
+  const scenario = SCENARIOS[scenarioIdx];
 
   return (
     <div className="flex flex-col items-center gap-6 pb-10">
@@ -80,11 +165,15 @@ export default function App() {
             height: 'calc(100% - 28px)',
           }}
         >
-          <UberOfferCard key={activeIdx} insights={active.insights} />
+          <UberOfferCard
+            key={`${scenarioIdx}-${incentiveTier}`}
+            insights={scenario.insights}
+            incentiveTier={incentiveTier}
+          />
         </div>
       </div>
 
-      {/* Toggle panel */}
+      {/* Demo control panel */}
       <div
         style={{
           background: '#fff',
@@ -92,58 +181,72 @@ export default function App() {
           boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
           padding: 16,
           width: 390,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 14,
+          fontFamily: 'system-ui',
         }}
       >
-        <p
-          style={{
-            fontSize: 10,
-            color: '#9ca3af',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            marginBottom: 10,
-            fontFamily: 'system-ui',
-          }}
-        >
-          Demo State
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {DEMO_STATES.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIdx(i)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '10px 12px',
-                borderRadius: 12,
-                border: activeIdx === i ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                background: activeIdx === i ? '#eff6ff' : '#f9fafb',
-                color: activeIdx === i ? '#1d4ed8' : '#374151',
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontFamily: 'system-ui',
-                transition: 'all 0.15s',
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 700 }}>{s.label}</span>
-              <span style={{ fontSize: 10, color: '#9ca3af', marginTop: 2, lineHeight: 1.3 }}>
-                {s.description}
-              </span>
-            </button>
-          ))}
+        {/* Scenario dropdown */}
+        <div>
+          <p style={{ fontSize: 10, color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>
+            Insight Scenario
+          </p>
+          <select
+            value={scenarioIdx}
+            onChange={(e) => setScenarioIdx(Number(e.target.value))}
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              borderRadius: 10,
+              border: '1.5px solid #e5e7eb',
+              background: '#f9fafb',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#374151',
+              fontFamily: 'system-ui',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {SCENARIOS.map((s, i) => (
+              <option key={i} value={i}>{s.label}</option>
+            ))}
+          </select>
         </div>
-        <p
-          style={{
-            fontSize: 10,
-            color: '#9ca3af',
-            textAlign: 'center',
-            marginTop: 10,
-            fontFamily: 'system-ui',
-          }}
-        >
-          Tap a badge in the card to expand the full breakdown
+
+        {/* Incentive tier toggle */}
+        <div>
+          <p style={{ fontSize: 10, color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>
+            Incentive Tier
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+            {TIERS.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setIncentiveTier(t.value)}
+                style={{
+                  padding: '8px 4px',
+                  borderRadius: 10,
+                  border: incentiveTier === t.value ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+                  background: incentiveTier === t.value ? '#eff6ff' : '#f9fafb',
+                  color: incentiveTier === t.value ? '#1d4ed8' : '#374151',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui',
+                  lineHeight: 1.3,
+                  transition: 'all 0.12s',
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p style={{ fontSize: 10, color: '#9ca3af', textAlign: 'center', margin: 0 }}>
+          Tap the badge in the card to expand
         </p>
       </div>
     </div>

@@ -245,11 +245,11 @@ export default function UberOfferCard({ insights = [], incentiveTier = 0 }) {
         {/* Pickup Insights badge */}
         <InsightBadge insights={insights} />
 
-        {/* Tier bonus line — only renders for Tier 2+ */}
+        {/* Pickup Bonus line — distinct from Flash Incentive, uses MapPin not Zap */}
         {incentiveTier >= 2 && (
           <div className="px-4 pb-2">
             <span className="flex items-center gap-1 bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full w-fit">
-              <Zap size={11} className="text-yellow-500" fill="#eab308" />
+              <MapPin size={11} className="text-gray-500" />
               {TIER_LABELS[incentiveTier]}
             </span>
           </div>

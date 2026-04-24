@@ -104,6 +104,11 @@ const SCENARIOS = [
     label: 'Multiple issues stacked (+2)',
     insights: [INSIGHTS.no_stop, INSIGHTS.entrance_medium, INSIGHTS.crowded_high],
   },
+  {
+    label: 'Flash + Pickup Bonus stacked',
+    insights: [INSIGHTS.entrance_medium],
+    forceTier: 3,
+  },
 ];
 
 const TIERS = [
@@ -120,6 +125,7 @@ export default function App() {
   const [incentiveTier, setIncentiveTier] = useState(0);
 
   const scenario = SCENARIOS[scenarioIdx];
+  const activeTier = scenario.forceTier ?? incentiveTier;
 
   return (
     <div className="flex flex-col items-center gap-6 pb-10">
@@ -166,9 +172,9 @@ export default function App() {
           }}
         >
           <UberOfferCard
-            key={`${scenarioIdx}-${incentiveTier}`}
+            key={`${scenarioIdx}-${activeTier}`}
             insights={scenario.insights}
-            incentiveTier={incentiveTier}
+            incentiveTier={activeTier}
           />
         </div>
       </div>

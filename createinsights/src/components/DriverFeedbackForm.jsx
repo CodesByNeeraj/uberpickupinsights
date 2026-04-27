@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react'
 
 const ISSUES = [
-  { id: 'wrong_location', label: 'Wrong pickup location' },
-  { id: 'heavy_traffic',  label: 'Heavy traffic' },
-  { id: 'construction',   label: 'Construction area' },
-  { id: 'no_stopping',    label: 'No Stopping / Waiting Zones' },
+  { id: 'crowded_spot',       label: 'Pickup spot crowded' },
+  { id: 'construction',       label: 'Construction area' },
+  { id: 'no_stopping',        label: 'No Stopping / Waiting Zones' },
+  { id: 'entrance',           label: 'Entrance hard to find' },
+  { id: 'road_closed',        label: 'Road closed' },
+  { id: 'gated_community',    label: 'Gated community' },
+  { id: 'airport_terminal',   label: 'Airport terminal issue' },
 ]
 
 function scoreColor(n) {
@@ -21,7 +24,6 @@ function scoreLabel(n) {
 
 export default function DriverFeedbackForm() {
   const [easeScore, setEaseScore]           = useState(5)
-  const [locationAccurate, setLocationAccurate] = useState(null) // null | true | false
   const [selectedIssues, setSelectedIssues] = useState(new Set())
   const [comments, setComments]             = useState('')
   const [photos, setPhotos]                 = useState([])
@@ -54,8 +56,7 @@ export default function DriverFeedbackForm() {
     })
   }
 
-  const canSubmit = locationAccurate !== null
-  const fillPct   = `${((easeScore - 1) / 9) * 100}%`
+  const fillPct = `${((easeScore - 1) / 9) * 100}%`
 
   // ── Success screen ───────────────────────────────────────
   if (submitted) {
@@ -90,7 +91,7 @@ export default function DriverFeedbackForm() {
         {/* ── Q1: Ease of finding rider ── */}
         <div style={s.card}>
           <div style={s.qMeta}>
-            <span style={s.qNum}>1 / 3</span>
+            <span style={s.qNum}>1 / 2</span>
           </div>
           <h2 style={s.question}>
             On a scale of 1–10, how easy was it to find the rider?
@@ -139,42 +140,10 @@ export default function DriverFeedbackForm() {
           </div>
         </div>
 
-        {/* ── Q2: Pickup location accurate ── */}
+        {/* ── Q2: Issues encountered ── */}
         <div style={s.card}>
           <div style={s.qMeta}>
-            <span style={s.qNum}>2 / 3</span>
-            <span style={s.requiredTag}>Required</span>
-          </div>
-          <h2 style={s.question}>Was the pickup location accurate?</h2>
-
-          <div style={s.yesNoRow}>
-            <button
-              style={{
-                ...s.yesNoBtn,
-                ...(locationAccurate === true  ? s.yesActive  : {}),
-                ...(locationAccurate === false ? s.yesInactive : {}),
-              }}
-              onClick={() => setLocationAccurate(true)}
-            >
-              Yes
-            </button>
-            <button
-              style={{
-                ...s.yesNoBtn,
-                ...(locationAccurate === false ? s.noActive   : {}),
-                ...(locationAccurate === true  ? s.noInactive : {}),
-              }}
-              onClick={() => setLocationAccurate(false)}
-            >
-              No
-            </button>
-          </div>
-        </div>
-
-        {/* ── Q3: Issues encountered ── */}
-        <div style={s.card}>
-          <div style={s.qMeta}>
-            <span style={s.qNum}>3 / 3</span>
+            <span style={s.qNum}>2 / 2</span>
             <span style={s.optionalTag}>Optional</span>
           </div>
           <h2 style={s.question}>Were there any pickup issues encountered?</h2>
@@ -190,7 +159,7 @@ export default function DriverFeedbackForm() {
                   onClick={() => toggleIssue(issue.id)}
                 >
                   <span style={{ ...s.checkbox, ...(active ? s.checkboxActive : {}) }}>
-                    {active && '✓'}
+                    ✓
                   </span>
                   <span style={s.issueLabel}>{issue.label}</span>
                 </button>
@@ -249,14 +218,9 @@ export default function DriverFeedbackForm() {
         </div>
 
         {/* ── Submit ── */}
-        {!canSubmit && (
-          <p style={s.validationMsg}>Answer question 2 to continue</p>
-        )}
-
         <button
-          style={{ ...s.submitBtn, ...(!canSubmit ? s.submitDisabled : {}) }}
-          onClick={() => canSubmit && setSubmitted(true)}
-          disabled={!canSubmit}
+          style={s.submitBtn}
+          onClick={() => setSubmitted(true)}
         >
           Submit Feedback
         </button>
@@ -408,42 +372,7 @@ const s = {
     transition: 'color 0.1s, font-weight 0.1s',
   },
 
-  // Yes / No Q2
-  yesNoRow: {
-    display: 'flex',
-    gap: 10,
-  },
-  yesNoBtn: {
-    flex: 1,
-    padding: '16px',
-    borderRadius: 12,
-    border: '2px solid #252525',
-    background: '#1a1a1a',
-    color: '#777',
-    fontSize: 16,
-    fontWeight: 700,
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-    fontFamily: 'inherit',
-  },
-  yesActive: {
-    background: '#00d632',
-    borderColor: '#00d632',
-    color: '#000',
-  },
-  yesInactive: {
-    opacity: 0.4,
-  },
-  noActive: {
-    background: '#ff4444',
-    borderColor: '#ff4444',
-    color: '#fff',
-  },
-  noInactive: {
-    opacity: 0.4,
-  },
-
-  // Issues Q3
+  // Issues Q2
   issuesList: {
     display: 'flex',
     flexDirection: 'column',
@@ -471,6 +400,7 @@ const s = {
     height: 22,
     borderRadius: 6,
     border: '2px solid #333',
+    background: 'transparent',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -482,7 +412,7 @@ const s = {
   },
   checkboxActive: {
     background: '#00d632',
-    borderColor: '#00d632',
+    border: '2px solid #00d632',
     color: '#000',
   },
   issueLabel: {
@@ -565,12 +495,6 @@ const s = {
   },
 
   // Submit
-  validationMsg: {
-    textAlign: 'center',
-    color: '#ff4444',
-    fontSize: 13,
-    marginBottom: 10,
-  },
   submitBtn: {
     width: '100%',
     padding: '18px',
@@ -585,11 +509,6 @@ const s = {
     letterSpacing: 0.2,
     fontFamily: 'inherit',
     transition: 'opacity 0.15s',
-  },
-  submitDisabled: {
-    background: '#1a1a1a',
-    color: '#333',
-    cursor: 'not-allowed',
   },
   skipBtn: {
     display: 'block',
